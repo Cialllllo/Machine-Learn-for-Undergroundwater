@@ -39,7 +39,7 @@ if os.path.exists('best_multi_xgb_re.pkl'):
 else:
     base_model = xgb.XGBRegressor(
         n_estimators=1000,
-        tree_method='hist',
+        tree_method='gpu_hist',
         random_state=0,
         verbosity=0
     )
@@ -49,14 +49,18 @@ else:
 
     # IMPORTANT: 这里的搜索空间键必须以 estimator__ 开头，指向 base estimator 的参数
     search_spaces = {
-        'estimator__learning_rate': Real(0.01, 0.3, prior='log-uniform'),
+        'estimator__learning_rate': Real(0.01, 0.15, prior='log-uniform'),
         'estimator__max_depth': Integer(4, 8),
         'estimator__min_child_weight': Integer(1, 10),
-        'estimator__subsample': Real(0.5, 1.0),
-        'estimator__colsample_bytree': Real(0.5, 1.0),
+        'estimator__subsample': Real(0.6, 1.0),
+        'estimator__colsample_bytree': Real(0.5, 0.9),
         'estimator__gamma': Real(0, 5),
-        'estimator__reg_alpha': Real(0, 10),
-        'estimator__reg_lambda': Real(0, 10)
+        'estimator__reg_alpha': Real(0, 20),
+        'estimator__reg_lambda': Real(0, 20),
+        # 树数量增加（建议搭配小学习率）
+        'estimator__n_estimators': Integer(800, 2000),
+        'estimator__colsample_bylevel': Real(0.5, 1.0),
+        'estimator__colsample_bynode': Real(0.5, 1.0),
     }
 
     # BayesSearchCV：注意 n_jobs 设置，避免与 MultiOutput 的 n_jobs 嵌套冲突
