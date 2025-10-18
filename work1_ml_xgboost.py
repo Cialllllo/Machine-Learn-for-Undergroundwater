@@ -50,7 +50,7 @@ else:
     # IMPORTANT: 这里的搜索空间键必须以 estimator__ 开头，指向 base estimator 的参数
     search_spaces = {
         'estimator__learning_rate': Real(0.01, 0.3, prior='log-uniform'),
-        'estimator__max_depth': Integer(3, 12),
+        'estimator__max_depth': Integer(4, 8),
         'estimator__min_child_weight': Integer(1, 10),
         'estimator__subsample': Real(0.5, 1.0),
         'estimator__colsample_bytree': Real(0.5, 1.0),
