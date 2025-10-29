@@ -94,7 +94,7 @@ joblib.dump(opt2.best_estimator_, 'best_multi_xgb_re_v2.pkl')
 # ========== 7. 结果评估 ==========
 y_pred = opt2.predict(X_test)
 r2_scores = [r2_score(y_test[:, i], y_pred[:, i]) for i in range(y_test.shape[1])]
-mean_r2 = r2_score(y_test[:, 1:], y_pred[:, 1:])
+mean_r2 = r2_score(y_test, y_pred)
 cv_r2 = cross_val_score(opt2.best_estimator_, X_train, y_train, cv=10).mean()
 
 print("\n========== 精调结果 ==========")

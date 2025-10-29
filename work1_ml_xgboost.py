@@ -33,7 +33,7 @@ if os.path.exists('best_multi_xgb_re.pkl'):
     best_model = joblib.load('best_multi_xgb_re.pkl')
     y_pred = best_model.predict(X_test)
     r2_scores = [r2_score(y_test[:, i], y_pred[:, i]) for i in range(y_test.shape[1])]
-    print(f"平均 R²:{r2_score(y_test[:, 1:], y_pred[:, 1:]):.4f}")
+    print(f"平均 R²:{r2_score(y_test, y_pred):.4f}")
     params_lst = best_model.get_params()
     for params in params_lst.items():
         print(f'{params[0]}的最优值为{params[1]}')
@@ -86,7 +86,7 @@ else:
     # 预测评估
     y_pred = opt.predict(X_test)
     r2_scores = [r2_score(y_test[:, i], y_pred[:, i]) for i in range(y_test.shape[1])]
-    mean_r2 = r2_score(y_test[:, 1:], y_pred[:, 1:])
+    mean_r2 = r2_score(y_test, y_pred)
 
     print("每个系数的 R²:", r2_scores)
     print("平均 R²:", mean_r2)
