@@ -21,7 +21,7 @@ os.environ["OMP_NUM_THREADS"] = '6'
 
 # ========== 1. 读取特征与标签 ==========
 Eigenvalue = pd.read_csv(r'特征re.csv')
-data_label = pd.read_csv(r'标签.csv')
+data_label = pd.read_csv(r'标签.csv') # 改一下名字
 
 # 标签标准化
 y_standard = StandardScaler()
@@ -33,7 +33,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # ========== 2. 载入上一轮最优模型参数 ==========
-if not os.path.exists('best_multi_xgb_re.pkl'):
+if not os.path.exists('best_multi_xgb_re.pkl'):# 这里也改下名字
     raise FileNotFoundError("未找到 best_multi_xgb_re.pkl，请先运行第一阶段调参脚本。")
 
 old_model = joblib.load('best_multi_xgb_re.pkl')

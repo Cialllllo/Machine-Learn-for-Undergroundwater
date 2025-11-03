@@ -15,8 +15,8 @@ os.environ["OMP_NUM_THREADS"] = '6'
 
 
 # 读取准备好的特征
-Eigenvalue = pd.read_csv(r'特征re.csv')
-data_label = pd.read_csv(r'标签.csv')
+Eigenvalue = pd.read_csv(r'features.csv')
+data_label = pd.read_csv(r'标签.csv') # 这里需要改成实际的标签文件名
 
 # 对标签集进行标准化
 y_standard = StandardScaler()
@@ -29,7 +29,7 @@ X_train, X_test, y_train, y_test = train_test_split(Eigenvalue, Y_scale
 
 
 # 开始训练调参
-if os.path.exists('best_multi_xgb_re.pkl'):
+if os.path.exists('best_multi_xgb_re.pkl'): # 这里保存的模型最好也改下，和label的文件名最好一致，下面也是同理
     best_model = joblib.load('best_multi_xgb_re.pkl')
     y_pred = best_model.predict(X_test)
     r2_scores = [r2_score(y_test[:, i], y_pred[:, i]) for i in range(y_test.shape[1])]
