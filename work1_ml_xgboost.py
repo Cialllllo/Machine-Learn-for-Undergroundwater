@@ -18,6 +18,7 @@ os.environ["OMP_NUM_THREADS"] = '6'
 Eigenvalue = pd.read_csv(r'features.csv')
 data_label = pd.read_csv(r'.\label\GW_RCHG_cubic_relation.csv') # 这里需要改成实际的标签文件名
 
+
 # 对标签集进行标准化
 y_standard = StandardScaler()
 Y_scale = y_standard.fit_transform(data_label)
