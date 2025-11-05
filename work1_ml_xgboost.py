@@ -47,9 +47,7 @@ else:
         tree_method='hist',  # 改为 hist
         device='cuda',  # 启用 GPU
         random_state=0,
-        verbosity=0,
-        early_stopping_rounds=50,
-        eval_metric='rmse'
+        verbosity=0
     )
 
     # MultiOutput 包裹器：并行策略由你控制（此处设置为并行训练每个目标）
@@ -82,9 +80,7 @@ else:
     )
 
     # 运行调参（可能耗时）
-    opt.fit(X_train, y_train
-            ,callback=None,
-            eval_set=[(X_test, y_test)])
+    opt.fit(X_train, y_train)
     # 保存训练好的 multi-output 模型
     joblib.dump(opt.best_estimator_, 'GW_RCHG_cubic_relation_model.pkl')
     # 预测评估
