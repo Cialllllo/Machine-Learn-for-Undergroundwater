@@ -87,7 +87,7 @@ else:
     y_pred = opt.predict(X_test)
     r2_scores = [r2_score(y_test[:, i], y_pred[:, i]) for i in range(y_test.shape[1])]
     mean_r2 = opt.best_estimator_.score(X_test,y_test)
-
+    print(f'训练集R2为{opt.best_estimator_.score(X_train, y_train)}')
     print("每个系数的 R²:", r2_scores)
     print("平均 R²:", mean_r2)
     print("最佳参数:", opt.best_params_)
