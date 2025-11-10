@@ -14,9 +14,12 @@ os.environ["OMP_NUM_THREADS"] = '6'
 
 
 
+name = 'SHGWT'
+func = 'cubic'
+
 # 读取准备好的特征
 Eigenvalue = pd.read_csv(r'features.csv')
-data_label = pd.read_csv(r'.\label\SHGWT_cubic_relation.csv') # 这里需要改成实际的标签文件名
+data_label = pd.read_csv(fr'.\label\{name}_{func}_relation.csv') # 这里需要改成实际的标签文件名
 
 
 # 对标签集进行标准化
@@ -40,18 +43,20 @@ def params_get(model,your_own = True):
         # print(f'交叉验证R²为{cross_val_score(best_model, X_train, y_train, cv=10).mean():.4f}')
         print("每个系数的 R²:", r2_scores)
     else:
+        print(f'{name}--{func}')
         best_params = joblib.load(model).get_params()
         # print(f'5折R2为{cross_val_score(best_model,X_train,y_train,cv=5).mean()}')
         # 确定基础模型
-        base_model = xgb.XGBRegressor()
+        base_model = xgb.XGBRegressor(early_stopping_rounds=100)
         # 导入参数
         best_model = MultiOutputRegressor(base_model,n_jobs=-1).set_params(**best_params)
         best_model.fit(X_train,y_train)
         r2_scores = [best_model.estimators_[i].score(X_test,y_test[:,i]) for i in range(y_test.shape[1])]
         print(f"平均 R²:{best_model.score(X_test, y_test):.4f}")
+        print(f'训练集得分为{best_model.score(X_train,y_train)}')
         params_lst = best_model.get_params()
-        for params in params_lst.items():
-            print(f'{params[0]}的最优值为{params[1]}')
+        # for params in params_lst.items():
+            # print(f'{params[0]}的最优值为{params[1]}')
         # print(f'交叉验证R²为{cross_val_score(best_model, X_train, y_train, cv=10).mean():.4f}')
         print("每个系数的 R²:", r2_scores)
 
@@ -60,8 +65,8 @@ def params_get(model,your_own = True):
 
 
 # 开始训练调参
-if os.path.exists('SHGWT_square_relation_model.pkl'): # 这里保存的模型最好也改下，和label的文件名最好一致，下面也是同理
-    params_get('SHGWT_square_relation_model.pkl',False)
+if os.path.exists(f'model/{name}_{func}_relation_model.pkl'): # 这里保存的模型最好也改下，和label的文件名最好一致，下面也是同理
+    params_get(f'model/{name}_{func}_relation_model.pkl',False)
 else:
     base_model = xgb.XGBRegressor(
         n_estimators=1000,
@@ -105,7 +110,7 @@ else:
     # 运行调参（可能耗时）
     opt.fit(X_train, y_train)
     # 保存训练好的 multi-output 模型
-    joblib.dump(opt.best_estimator_, 'SHGWT_square_relation_model.pkl')
+    joblib.dump(opt.best_estimator_, f'model/{name}_{func}_relation_model.pkl')
     # 预测评估
     y_pred = opt.predict(X_test)
     r2_scores = [r2_score(y_test[:, i], y_pred[:, i]) for i in range(y_test.shape[1])]
