@@ -18,7 +18,7 @@ name = 'SHGWT'
 func = 'cubic'
 
 # 读取准备好的特征
-Eigenvalue = pd.read_csv(r'features.csv')
+features = pd.read_csv(r'features.csv')
 data_label = pd.read_csv(fr'.\label\{name}_{func}_relation.csv') # 这里需要改成实际的标签文件名
 
 
@@ -27,7 +27,7 @@ y_standard = StandardScaler()
 Y_scale = y_standard.fit_transform(data_label)
 
 # 划分训练集与测试集
-X_train, X_test, y_train, y_test = train_test_split(Eigenvalue, Y_scale
+X_train, X_test, y_train, y_test = train_test_split(features, Y_scale
                                                     , test_size=0.3, random_state=30)
 
 def params_get(model,your_own = True):
@@ -65,7 +65,7 @@ def params_get(model,your_own = True):
 
 
 # 开始训练调参
-if os.path.exists(f'model/{name}_{func}_relation_model.pkl'): # 这里保存的模型最好也改下，和label的文件名最好一致，下面也是同理
+if os.path.exists(f'XGB_model/{name}_{func}_relation_model.pkl'): # 这里保存的模型最好也改下，和label的文件名最好一致，下面也是同理
     params_get(f'model/{name}_{func}_relation_model.pkl',False)
 else:
     base_model = xgb.XGBRegressor(
@@ -110,7 +110,7 @@ else:
     # 运行调参（可能耗时）
     opt.fit(X_train, y_train)
     # 保存训练好的 multi-output 模型
-    joblib.dump(opt.best_estimator_, f'model/{name}_{func}_relation_model.pkl')
+    joblib.dump(opt.best_estimator_, f'XGB_model/{name}_{func}_relation_model.pkl')
     # 预测评估
     y_pred = opt.predict(X_test)
     r2_scores = [r2_score(y_test[:, i], y_pred[:, i]) for i in range(y_test.shape[1])]
