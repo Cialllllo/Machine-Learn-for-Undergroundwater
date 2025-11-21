@@ -43,7 +43,7 @@ if os.path.exists(f'./LightGBM_params/{name}_{func}_params.json'):
         print(f'{r2_score(y_test[:,i],model.predict(X_test)[:,i]):.4f}')
 else:
     # lightGBM 原生不支持多输出回归
-    base_model = GBM.LGBMRegressor(n_estimators=300)
+    base_model = GBM.LGBMRegressor(n_estimators=300,verbose = -1)
     model = MultiOutputRegressor(
         base_model,
         n_jobs=-1
@@ -72,6 +72,12 @@ else:
     best_gbr_model = grid_search.best_estimator_
     score = best_gbr_model.score(X_test,y_test)
     params = grid_search.best_params_
-    with open(f'./LightGBM_params/{name}_{func}_params.json', 'w') as f:
-        json.dump(params, f)
+    try:
+        with open(f'./RF_params/{name}_{func}_params.json', 'w') as f:
+            f.write(json.dumps(params, ensure_ascii=True, indent=4))
+            print('最佳参数保存为json文件格式')
+    except Exception as e:
+        with open(f'./RF_params/{name}_{func}_params.txt', 'w') as f:
+            f.write(params)
+            print('json文件保存失败，已经保存为txt文件')
     print(f'测试集得分为{score:.4f}')

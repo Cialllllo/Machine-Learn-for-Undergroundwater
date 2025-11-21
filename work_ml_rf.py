@@ -4,15 +4,12 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, explained_variance_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.multioutput import MultiOutputRegressor
-from sklearn.impute import SimpleImputer
-import matplotlib.pyplot as plt
 import json
 import os
 
 # 读取特征与标签数据集
 
-name = 'GW_RCHG'
+name = 'SHGWT'
 func = 'square'
 
 features = pd.read_csv('features.csv')
@@ -42,7 +39,6 @@ else:
     model = RandomForestRegressor(n_estimators=300)
     search_space = {
         'n_estimators': np.arange(300,1200,100),
-        'learning_rate': np.arange(0.05,0.1,0.01),
         'max_depth': np.arange(2,5,1),
         'min_samples_split': np.arange(2,5,1),
         'min_samples_leaf': np.arange(1,5,1),
@@ -61,6 +57,12 @@ else:
     best_gbr_model = grid_search.best_estimator_
     score = best_gbr_model.score(X_test,y_test)
     params = grid_search.best_params_
-    with open(f'./GBR_params/{name}_{func}_params.json', 'w') as f:
-        json.dump(params, f)
+    try:
+        with open(f'./RF_params/{name}_{func}_params.json', 'w') as f:
+            f.write(json.dumps(params, ensure_ascii=True, indent=4))
+            print('最佳参数保存为json文件格式')
+    except Exception as e:
+        with open(f'./RF_params/{name}_{func}_params.txt', 'w') as f:
+            f.write(params)
+            print('json文件保存失败，已经保存为txt文件')
     print(f'测试集得分为{score:.4f}')
