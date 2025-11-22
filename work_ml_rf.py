@@ -2,15 +2,16 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, explained_variance_score
+from sklearn.metrics import r2_score
 from sklearn.preprocessing import StandardScaler
 import json
 import os
-
+from modelprocessing import Encoder
 # 读取特征与标签数据集
 
 name = 'SHGWT'
 func = 'square'
+
 
 features = pd.read_csv('features.csv')
 label = pd.read_csv(f'./label/{name}_{func}_relation.csv')
@@ -23,8 +24,8 @@ Y_scale = y_standard.fit_transform(label)
 X_train, X_test, y_train, y_test = train_test_split(features, Y_scale
                                                     , test_size=0.3, random_state=30)
 
-if os.path.exists(f'./GBR_params/{name}_{func}_params.json'):
-    with open(f'./GBR_params/{name}_{func}_params.json', 'r', encoding='utf-8') as file:
+if os.path.exists(f'./RF_params/{name}_{func}_params.json'):
+    with open(f'./RF_params/{name}_{func}_params.json', 'r', encoding='utf-8') as file:
         # 使用 json.load() 方法加载文件内容并转换为 Python 对象
         params = json.load(file)
     model = RandomForestRegressor()
@@ -57,12 +58,7 @@ else:
     best_gbr_model = grid_search.best_estimator_
     score = best_gbr_model.score(X_test,y_test)
     params = grid_search.best_params_
-    try:
-        with open(f'./RF_params/{name}_{func}_params.json', 'w') as f:
-            f.write(json.dumps(params, ensure_ascii=True, indent=4))
-            print('最佳参数保存为json文件格式')
-    except Exception as e:
-        with open(f'./RF_params/{name}_{func}_params.txt', 'w') as f:
-            f.write(params)
-            print('json文件保存失败，已经保存为txt文件')
+    with open(f'./RF_params/{name}_{func}_params.json', 'w') as f:
+        f.write(json.dumps(params,cls=Encoder))
+        print('最佳参数保存为json文件格式')
     print(f'测试集得分为{score:.4f}')

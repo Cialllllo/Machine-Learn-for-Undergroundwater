@@ -11,6 +11,15 @@ import json
 import os
 
 
+class Encoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+
 
 name = 'GW_RCHG'
 func = 'square'
@@ -72,12 +81,7 @@ else:
     best_gbr_model = grid_search.best_estimator_
     score = best_gbr_model.score(X_test,y_test)
     params = grid_search.best_params_
-    try:
-        with open(f'./RF_params/{name}_{func}_params.json', 'w') as f:
-            f.write(json.dumps(params, ensure_ascii=True, indent=4))
-            print('最佳参数保存为json文件格式')
-    except Exception as e:
-        with open(f'./RF_params/{name}_{func}_params.txt', 'w') as f:
-            f.write(params)
-            print('json文件保存失败，已经保存为txt文件')
+    with open(f'./RF_params/{name}_{func}_params.json', 'w') as f:
+        f.write(json.dumps(params, ensure_ascii=True, indent=4,cls=Encoder))
+        print('最佳参数保存为json文件格式')
     print(f'测试集得分为{score:.4f}')
