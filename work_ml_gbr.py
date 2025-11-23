@@ -9,25 +9,16 @@ from sklearn.impute import SimpleImputer
 import matplotlib.pyplot as plt
 import json
 import os
-
+import modelprocessing
 # 读取特征与标签数据集
 
-name = 'SHGWT'
-func = 'square'
+name = 'SA_ST'
+func = 'cubic'
+# 划分训练集
+X_train, X_test, y_train, y_test = modelprocessing.data_processing(name=name,func=func)
 
-features = pd.read_csv('features.csv')
-label = pd.read_csv(f'./label/{name}_{func}_relation.csv')
-
-# 对标签集进行标准化
-y_standard = StandardScaler()
-Y_scale = y_standard.fit_transform(label)
-
-# 划分训练集与测试集
-X_train, X_test, y_train, y_test = train_test_split(features, Y_scale
-                                                    , test_size=0.3, random_state=30)
-
-if os.path.exists(f'./RF_params/{name}_{func}_params.json'):
-    with open(f'./RF_params/{name}_{func}_params.json', 'r', encoding='utf-8') as file:
+if os.path.exists(f'./GBR_params/{name}_{func}_params.json'):
+    with open(f'./GBR_params/{name}_{func}_params.json', 'r', encoding='utf-8') as file:
         # 使用 json.load() 方法加载文件内容并转换为 Python 对象
         params = json.load(file)
     base_model = GradientBoostingRegressor()
@@ -68,12 +59,6 @@ else:
     best_gbr_model = grid_search.best_estimator_
     score = best_gbr_model.score(X_test,y_test)
     params = grid_search.best_params_
-    try:
-        with open(f'./RF_params/{name}_{func}_params.json', 'w') as f:
-            f.write(json.dumps(params,ensure_ascii=True,indent=4))
-            print('最佳参数保存为json文件格式')
-    except Exception as e:
-        with open(f'./RF_params/{name}_{func}_params.txt', 'w') as f:
-            f.write(params)
-            print('json文件保存失败，已经保存为txt文件')
+    with open(f'./GBR_params/{name}_{func}_params.json', 'w') as f:
+        json.dump(params, f, cls=modelprocessing.Encoder, ensure_ascii=True, indent=4)
     print(f'测试集得分为{score:.4f}')

@@ -1,34 +1,20 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split,cross_val_score
-from sklearn.preprocessing import StandardScaler
-import numpy as np
 import joblib
 from skopt import BayesSearchCV
-from skopt.space import Real, Integer, Categorical
+from skopt.space import Real, Integer
 import os
 import xgboost as xgb
 from sklearn.multioutput import MultiOutputRegressor
-from sklearn.metrics import make_scorer,r2_score
+from sklearn.metrics import r2_score
+import modelprocessing
 os.environ["OMP_NUM_THREADS"] = '6'
 
 
 
 
 name = 'SHGWT'
-func = 'cubic'
+func = 'square'
 
-# 读取准备好的特征
-features = pd.read_csv(r'features.csv')
-data_label = pd.read_csv(fr'.\label\{name}_{func}_relation.csv') # 这里需要改成实际的标签文件名
-
-
-# 对标签集进行标准化
-y_standard = StandardScaler()
-Y_scale = y_standard.fit_transform(data_label)
-
-# 划分训练集与测试集
-X_train, X_test, y_train, y_test = train_test_split(features, Y_scale
-                                                    , test_size=0.3, random_state=30)
+X_train, X_test, y_train, y_test = modelprocessing.data_processing(name=name,func=func)
 
 def params_get(model,your_own = True):
     if your_own:
@@ -53,7 +39,6 @@ def params_get(model,your_own = True):
         best_model.fit(X_train,y_train)
         r2_scores = [best_model.estimators_[i].score(X_test,y_test[:,i]) for i in range(y_test.shape[1])]
         print(f"平均 R²:{best_model.score(X_test, y_test):.4f}")
-        print(f'训练集得分为{best_model.score(X_train,y_train)}')
         params_lst = best_model.get_params()
         # for params in params_lst.items():
             # print(f'{params[0]}的最优值为{params[1]}')
@@ -66,7 +51,7 @@ def params_get(model,your_own = True):
 
 # 开始训练调参
 if os.path.exists(f'XGB_model/{name}_{func}_relation_model.pkl'): # 这里保存的模型最好也改下，和label的文件名最好一致，下面也是同理
-    params_get(f'model/{name}_{func}_relation_model.pkl',False)
+    params_get(f'XGB_model/{name}_{func}_relation_model.pkl',False)
 else:
     base_model = xgb.XGBRegressor(
         n_estimators=1000,
@@ -115,7 +100,6 @@ else:
     y_pred = opt.predict(X_test)
     r2_scores = [r2_score(y_test[:, i], y_pred[:, i]) for i in range(y_test.shape[1])]
     mean_r2 = opt.best_estimator_.score(X_test,y_test)
-    print(f'训练集R2为{opt.best_estimator_.score(X_train, y_train)}')
     print('在训练中最佳分数为')
     print("每个系数的 R²:", r2_scores)
     print("平均 R²:", mean_r2)
