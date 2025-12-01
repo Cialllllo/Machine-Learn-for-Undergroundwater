@@ -15,7 +15,7 @@ import modelprocessing
 name = 'SA_ST'
 func = 'cubic'
 # 划分训练集
-X_train, X_test, y_train, y_test = modelprocessing.data_processing(name=name,func=func)
+X_train, X_test, y_train, y_test = modelprocessing.data_processing(relation=name, func=func)
 
 if os.path.exists(f'./GBR_params/{name}_{func}_params.json'):
     with open(f'./GBR_params/{name}_{func}_params.json', 'r', encoding='utf-8') as file:

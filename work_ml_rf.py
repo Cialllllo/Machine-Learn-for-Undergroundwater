@@ -1,9 +1,8 @@
-import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import r2_score
-from sklearn.preprocessing import StandardScaler
+from sklearn.multioutput import MultiOutputRegressor
 import json
 import os
 from modelprocessing import Encoder
@@ -11,16 +10,13 @@ import modelprocessing
 # 读取特征与标签数据集
 
 name = 'SHGWT'
-func = 'square'
+func = 'quadratic'
 
 
-X_train, X_test, y_train, y_test = modelprocessing.data_processing(name=name,func=func)
+X_train, X_test, y_train, y_test = modelprocessing.data_processing(relation=name, func=func)
 
 if os.path.exists(f'./RF_params/{name}_{func}_params.json'):
-    with open(f'./RF_params/{name}_{func}_params.json', 'r', encoding='utf-8') as file:
-        # 使用 json.load() 方法加载文件内容并转换为 Python 对象
-        params = json.load(file)
-    model = RandomForestRegressor(**params)
+    model = modelprocessing.rf_processing(name,func)
     model.fit(X_train,y_train)
     score = model.score(X_test, y_test)
     print(f'测试集得分为{score:.4f}')
@@ -29,19 +25,21 @@ if os.path.exists(f'./RF_params/{name}_{func}_params.json'):
         print(f'{r2_score(y_test[:,i],model.predict(X_test)[:,i]):.4f}')
 else:
     # 随机森林支持多输出
-    model = RandomForestRegressor(n_estimators=300)
+    base_model = RandomForestRegressor()
+    model = MultiOutputRegressor(base_model,n_jobs=1)
     search_space = {
-        'n_estimators': np.arange(300,1200,100),
-        'max_depth': np.arange(2,5,1),
-        'min_samples_split': np.arange(2,5,1),
-        'min_samples_leaf': np.arange(1,5,1),
-        'max_features':['sqrt','log2',1.0]
+        'estimator__n_estimators': [300, 500, 800],
+        'estimator__max_depth': [None, 5, 10, 20],
+        'estimator__min_samples_split': [2, 5, 10],
+        'estimator__min_samples_leaf': [1, 2, 4],
+        'estimator__max_features': ['sqrt', 'log2'],
+        'estimator__bootstrap': [True]
     }
     grid_search = GridSearchCV(
         estimator=model,
         param_grid=search_space,
         cv=5,
-        n_jobs=1,
+        n_jobs=-1,
         verbose=2
     )
 

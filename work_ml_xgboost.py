@@ -12,9 +12,9 @@ os.environ["OMP_NUM_THREADS"] = '6'
 
 
 name = 'SHGWT'
-func = 'square'
+func = 'quadratic'
 
-X_train, X_test, y_train, y_test = modelprocessing.data_processing(name=name,func=func)
+X_train, X_test, y_train, y_test = modelprocessing.data_processing(relation=name, func=func)
 
 def params_get(model,your_own = True):
     if your_own:
