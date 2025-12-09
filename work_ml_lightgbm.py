@@ -1,16 +1,17 @@
 import numpy as np
 import lightgbm as GBM
-from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import r2_score
 from sklearn.multioutput import MultiOutputRegressor
 import json
 import os
 import modelprocessing
+from skopt.space import Real, Integer, Categorical
+from skopt import BayesSearchCV
 
 
 # 这里name和func需要改
-name = 'GW_RCHG'
-func = 'quadratic'
+name = 'SHGWT'
+func = 'cubic'
 X_train, X_test, y_train, y_test = modelprocessing.data_processing(relation=name, func=func)
 
 if os.path.exists(f'./LightGBM_params/{name}_{func}_params.json'): # 这里为保存路径修改一下，你要能找得到
@@ -30,33 +31,35 @@ if os.path.exists(f'./LightGBM_params/{name}_{func}_params.json'): # 这里为�
         print(f'{r2_score(y_test[:,i],model.predict(X_test)[:,i]):.4f}')
 else:
     # lightGBM 原生不支持多输出回归
-    base_model = GBM.LGBMRegressor(n_estimators=300,verbose = -1,boosting_type='dart',reg_alpha=0,reg_lambda=0.1)
+    base_model = GBM.LGBMRegressor(verbose = -1,boosting_type='dart',reg_alpha=0,reg_lambda=0.1)
     model = MultiOutputRegressor(
         base_model,
         n_jobs=-1
     )
     search_space = {
-        'estimator__num_leaves': [15, 31, 63],
-        'estimator__max_depth': [-1,3,5,7],
-        'estimator__learning_rate': [0.05, 0.1, 0.15],
-        'estimator__n_estimators': [300, 500,800,1000,1200],
-        'estimator__subsample': [0.8, 0.9, 1.0],
-        'estimator__min_child_samples': [10, 20]
+        'estimator__boosting_type': Categorical(['gbdt', 'dart', 'rf']),
+        'estimator__num_leaves': Integer(15, 60),
+        'estimator__max_depth': Integer(2, 5),
+        'estimator__learning_rate': Real(0.05, 0.2),
+        'estimator__min_samples_leaf': Integer(1, 5),
+        'estimator__n_estimators': Integer(300, 1200),
+        'estimator__reg_alpha': Real(0, 0.01),
+        'estimator__reg_lambda': Real(0, 0.01)
     }
 
-    grid_search = GridSearchCV(
+    bayes_search = BayesSearchCV(
         estimator=model,
-        param_grid=search_space,
+        search_spaces=search_space,
         cv=5,
         n_jobs=1,
         verbose=2
     )
 
-    grid_search.fit(X_train, y_train)
-    print(grid_search.best_params_)
-    best_gbr_model = grid_search.best_estimator_
+    bayes_search.fit(X_train, y_train)
+    print(bayes_search.best_params_)
+    best_gbr_model = bayes_search.best_estimator_
     score = best_gbr_model.score(X_test,y_test)
-    params = grid_search.best_params_
+    params = bayes_search.best_params_
     # 将最佳参数进行保存，路径修改
     with open(f'./LightGBM_params/{name}_{func}_params.json', 'w') as f:
         f.write(json.dumps(params, ensure_ascii=True, indent=4,cls=modelprocessing.Encoder))

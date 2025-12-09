@@ -151,6 +151,7 @@ def multioutput_rfecv(model_process,
             score = r2_score(y_val, pred, multioutput='uniform_average')
             cv_scores.append(score)
 
+
         mean_score = np.mean(cv_scores)
 
         # 记录历史
@@ -205,7 +206,7 @@ def multioutput_rfecv(model_process,
     plt.gca().spines['top'].set_visible(False)
     plt.gca().spines['right'].set_visible(False)
     plt.tight_layout()
-    plt.show()
+    plt.savefig(f'{relation}_{func}_rfecv.png')
 
     return best_features, best_score, feature_hist, score_hist
 
