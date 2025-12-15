@@ -17,6 +17,34 @@ import gc
 import warnings
 warnings.filterwarnings("ignore")
 
+
+# 在 modelprocessing.py 中添加以下函数
+
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+
+def calculate_metrics(y_true, y_pred):
+    """
+    计算并返回常见回归指标
+
+    参数:
+        y_true (np.ndarray): 真实值
+        y_pred (np.ndarray): 预测值
+
+    返回:
+        dict: 包含各种指标的字典
+    """
+    mse = mean_squared_error(y_true, y_pred)
+    rmse = np.sqrt(mse)
+    mae = mean_absolute_error(y_true, y_pred)
+    r2 = r2_score(y_true, y_pred)
+
+    return {
+        'MSE': float(mse),
+        'RMSE': float(rmse),
+        'MAE': float(mae),
+        'R2': float(r2)
+    }
+
 class Encoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.integer):
@@ -80,7 +108,7 @@ def gbr_processing(relation = 'GW_RCHG',func = 'cubic'):
 def gbm_processing(relation = 'GW_RCHG',func = 'cubic'):
     with open(f'./LightGBM_params/{relation}_{func}_params.json', 'r', encoding='utf-8') as file:
         params = json.load(file)
-    base_model = GBM.LGBMRegressor()
+    base_model = GBM.LGBMRegressor(verbose = -1)
     # 修正参数传递
     model = MultiOutputRegressor(base_model,n_jobs=1)
     model.set_params(**params)  # 正确设置参数的方式
@@ -211,17 +239,21 @@ def multioutput_rfecv(model_process,
     return best_features, best_score, feature_hist, score_hist
 
 
-def R2_plot(Y_true
-                     , Y_pred
-                     , path='parity_plot_dynamic_limits.png'
-                     , title="Model Performance For Param A"):
+# 替换或更新 modelprocessing.py 中的 R2_plot 函数为如下版本：
+
+def R2_plot(Y_true,
+            Y_pred,
+            path='parity_plot_dynamic_limits.png',
+            title="Model Performance For Param A"):
     """
     绘制真实值 vs. 预测值的散点图，并添加 y=x 基准线。
     轴的范围由数据的最小值和最大值动态确定。
+    同时打印多个回归指标。
 
     Args:
         Y_true (array-like): 真实值 (X轴)。
         Y_pred (array-like): 预测值 (Y轴)。
+        path (str): 图片保存路径。
         title (str): 图表标题。
     """
 
@@ -230,25 +262,18 @@ def R2_plot(Y_true
     Y_pred = np.asarray(Y_pred)
 
     # 2. 设置图形尺寸和风格
-    plt.figure(figsize=(8, 8))  # 使用正方形图幅
+    plt.figure(figsize=(8, 8))
     plt.style.use('default')
 
-    # 3. 核心修改：动态计算轴的范围
-    # 找到所有数据点的全局最小值和最大值
+    # 3. 动态计算轴的范围
     global_min = min(Y_true.min(), Y_pred.min())
     global_max = max(Y_true.max(), Y_pred.max())
-
-    # 计算一个安全的边距（例如 5%）
     padding = (global_max - global_min) * 0.05
-
-    # 确定最终的绘图范围
     limit_min = global_min - padding
     limit_max = global_max + padding
-
-    # 创建 y=x 基准线的点
     plot_range = np.linspace(limit_min, limit_max, 100)
 
-    # 4. 绘制 y=x 基准线 (对角线)
+    # 4. 绘制 y=x 基准线
     plt.plot(plot_range, plot_range,
              color='red',
              linestyle='--',
@@ -262,32 +287,31 @@ def R2_plot(Y_true
                 alpha=0.7,
                 label='Predicted Data')
 
-    # 6. 设置轴的范围和比例
-    # 使用动态计算的范围设置 X 和 Y 轴
+    # 6. 设置坐标轴范围
     plt.xlim(limit_min, limit_max)
     plt.ylim(limit_min, limit_max)
 
-    # 强制 X 和 Y 轴比例一致，确保 y=x 是 45 度角
-    # 注意：plt.axis('equal') 也可以实现，但显式设置 xlim/ylim 更能控制边距。
+    # 7. 添加标题、标签及样式
+    metrics = calculate_metrics(Y_true, Y_pred)
+    metric_text = '\n'.join([f"{k}: {v:.4f}" for k, v in metrics.items()])
+    full_title = f"{title}\n{metric_text}"
 
-    # 7. 设置标题和标签
-    r2 = r2_score(Y_true, Y_pred)
-    plt.title(f"{title} ($\it{{R^2}}$={r2:.3f})", fontsize=16, fontweight='bold')
+    plt.title(full_title, fontsize=14, fontweight='bold')
     plt.xlabel('True Values', fontsize=14)
     plt.ylabel('Predicted Values', fontsize=14)
-
-    # 8. 优化刻度、图例和网格
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
     plt.grid(True, linestyle=':', alpha=0.5)
     plt.legend(fontsize=12, loc='upper left', frameon=True, shadow=True)
-
-    # 9. 调整布局并保存
     plt.tight_layout()
     plt.savefig(path, dpi=300)
     plt.close()
 
     print(f"动态范围的预测 vs. 真实值图已保存为 {path}")
+    print("模型性能指标:")
+    for key, value in metrics.items():
+        print(f"  {key}: {value:.4f}")
+
 
 
 

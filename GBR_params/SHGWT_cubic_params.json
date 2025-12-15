@@ -1,5 +1,0 @@
-{"estimator__learning_rate": 0.08,
-  "estimator__max_depth": 4,
-  "estimator__min_samples_leaf": 1,
-  "estimator__min_samples_split": 2,
-  "estimator__n_estimators": 700}
