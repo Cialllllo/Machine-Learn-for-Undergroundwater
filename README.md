@@ -1,8 +1,8 @@
 # 💧 Gray-Box ML Framework for Groundwater-Irrigation Response
 
-<!-[License](LICENSE)>
-<!-[Paper](https://doi.org/10.3390/w18141661)>
-<!-[Python](https://www.python.org/)>
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Paper](https://img.shields.io/badge/Paper-Water%20Journal-green)](https://doi.org/10.3390/w18141661)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
 
 Official code implementation for the paper: **"Gray-Box Machine Learning Framework for Extracting Groundwater–Irrigation Response Functions and Inverting Hydrogeological Parameters"**.
 
@@ -73,3 +73,35 @@ Model input features are divided into three tiers to simulate different data sca
 Ensure you have the following Python libraries installed:
 ```bash
 pip install numpy pandas scikit-learn xgboost lightgbm shap grf
+```
+2. Data Preparation
+(Note: Due to the large data size, please refer to the paper's appendix or contact the author for the raw SWAT-GW simulation data. This assumes the data is placed in the data/ directory)
+```bash
+# Example directory structure
+data/
+├── label/            # Raw simulation data
+├── processed/      # Processed features and labels
+```
+📈 Key Results
+Optimal Polynomial Order: The quadratic polynomial achieved the best balance between fitting accuracy ($R^2 > 0.994$) and ML learnability.
+Inversion Accuracy:
+Precipitation infiltration coefficient ($\alpha$) and natural recharge ($R_{nat}$) achieved inversion $R^2 > 0.96$.
+The RMSE for the equilibrium point ($IRR_{eq}$) was approximately 20-22 mm.
+Impact of Data Scarcity:
+Recharge prediction was most robust to data scarcity (requiring only Tier 1 data).
+Water Table prediction was highly dependent on the specific yield (GW_SPYLD) parameter in Tier 3.
+
+📄 Citation
+If you use the code or data from this project, please cite the original paper:
+```bibtex
+@article{ou2026gray,
+  title={Gray-Box Machine Learning Framework for Extracting Groundwater--Irrigation Response Functions and Inverting Hydrogeological Parameters},
+  author={Ou, Wenyong and others},
+  journal={Water},
+  volume={18},
+  number={14},
+  pages={1661},
+  year={2026},
+  publisher={MDPI}
+}
+```
