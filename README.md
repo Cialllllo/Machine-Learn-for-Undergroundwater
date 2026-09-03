@@ -80,16 +80,16 @@ pip install numpy pandas scikit-learn xgboost lightgbm shap grf
 # Example directory structure
 data/
 ├── label/            # Raw simulation data
-├── processed/      # Processed features and labels
+├── feature.csv     # Processed features and labels
 ```
 📈 Key Results
-Optimal Polynomial Order: The quadratic polynomial achieved the best balance between fitting accuracy ($R^2 > 0.994$) and ML learnability.
-Inversion Accuracy:
-Precipitation infiltration coefficient ($\alpha$) and natural recharge ($R_{nat}$) achieved inversion $R^2 > 0.96$.
-The RMSE for the equilibrium point ($IRR_{eq}$) was approximately 20-22 mm.
-Impact of Data Scarcity:
-Recharge prediction was most robust to data scarcity (requiring only Tier 1 data).
-Water Table prediction was highly dependent on the specific yield (GW_SPYLD) parameter in Tier 3.
+- Optimal Polynomial Order: The quadratic polynomial achieved the best balance between fitting accuracy ($R^2 > 0.994$) and ML learnability.
+- Inversion Accuracy:
+ Precipitation infiltration coefficient ($\alpha$) and natural recharge ($R_{nat}$) achieved inversion $R^2 > 0.96$.
+ The RMSE for the equilibrium point ($IRR_{eq}$) was approximately 20-22 mm.
+- Impact of Data Scarcity:
+ Recharge prediction was most robust to data scarcity (requiring only Tier 1 data).
+ Water Table prediction was highly dependent on the specific yield (GW_SPYLD) parameter in Tier 3.
 
 📄 Citation
 If you use the code or data from this project, please cite the original paper:
